@@ -1,0 +1,106 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paint</title>
+    <link rel="icon" href="paint.png" type="image/icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="text-center fixed-top">
+        <button class="p-1 btn-success" id="pencil">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+            </svg>
+        </button>
+        <button class="p-1 btn-danger" id="eraser">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eraser" viewBox="0 0 16 16">
+                <path d="M8.086 2.207a2 2 0 0 1 2.828 0l3.879 3.879a2 2 0 0 1 0 2.828l-5.5 5.5A2 2 0 0 1 7.879 15H5.12a2 2 0 0 1-1.414-.586l-2.5-2.5a2 2 0 0 1 0-2.828l6.879-6.879zm2.121.707a1 1 0 0 0-1.414 0L4.16 7.547l5.293 5.293 4.633-4.633a1 1 0 0 0 0-1.414l-3.879-3.879zM8.746 13.547 3.453 8.254 1.914 9.793a1 1 0 0 0 0 1.414l2.5 2.5a1 1 0 0 0 .707.293H7.88a1 1 0 0 0 .707-.293l.16-.16z"/>
+            </svg>
+        </button>
+        Select width of line: <input type="number" id="lineWidth">
+        Select color of line: <input type="color" id="lineColor">
+        <button class="btn btn-primary" id="clearbtn">Clear</button>
+        <button class="btn btn-primary" id="savebtn">Save</button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script>
+        let canvas=document.getElementById("canvas");
+        canvas.height=window.innerHeight;
+        canvas.width=window.innerWidth;
+        let ctx=canvas.getContext('2d');
+        let prevX=null;
+        let prevY=null;
+        let draw=false;
+        let button='pencil';
+        window.addEventListener('mousemove', (e)=>{
+            if(prevX==null || prevY==null || draw==false){
+                prevX=e.clientX;
+                prevY=e.clientY;
+                return;
+            }
+            let currX=e.clientX;
+            let currY=e.clientY;
+            ctx.beginPath();
+            ctx.moveTo(prevX, prevY);
+            ctx.lineTo(currX, currY);
+            ctx.stroke();
+            prevX=currX;
+            prevY=currY;
+        });
+        window.addEventListener('mousedown',(e)=>{draw=true;});
+        window.addEventListener('mouseup',(e)=>{draw=false;});
+        let lwidth=document.getElementById("lineWidth");
+        lwidth.onchange=function(){
+            ctx.lineWidth=lwidth.value;
+        };
+        let lcolor=document.getElementById("lineColor");
+        lcolor.onchange=function(){
+            if(button=='pencil')
+                ctx.strokeStyle=lcolor.value;
+        };
+        let clearBtn=document.getElementById("clearbtn");
+        clearBtn.addEventListener('click',()=>{
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+        });
+        let saveBtn=document.getElementById("savebtn");
+        saveBtn.addEventListener('click',()=>{
+            let data=canvas.toDataURL("imag/png");
+            let a=document.createElement('a');
+            a.href=data;
+            a.download="myCanvas.png";
+            a.click();
+        });
+        let drawBtn=document.getElementById('pencil');
+        drawBtn.addEventListener('click',()=>{
+            button='pencil';
+            ctx.strokeStyle=lcolor.value;
+            if(drawBtn.classList.contains('btn-danger')){
+                drawBtn.classList.remove('btn-danger');
+                drawBtn.classList.add('btn-success');
+                eraserBtn.classList.remove('btn-success');
+                eraserBtn.classList.add('btn-danger');
+            }
+        });
+        let eraserBtn=document.getElementById('eraser');
+        eraserBtn.addEventListener('click',()=>{
+            button='eraser';
+            ctx.strokeStyle="#fff";
+            if(eraserBtn.classList.contains('btn-danger')){
+                eraserBtn.classList.remove('btn-danger');
+                eraserBtn.classList.add('btn-success');
+                drawBtn.classList.remove('btn-success');
+                drawBtn.classList.add('btn-danger');
+            }
+        });
+    </script>
+</body>
+</html>
